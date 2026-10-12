@@ -1,0 +1,22 @@
+[project]
+name = "hdb-tt-venv"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "dcheww006", email = "danielchew66@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "ipykernel>=7.3.0",
+    "matplotlib>=3.10.9",
+    "pandas>=2.3.3",
+    "seaborn>=0.13.2",
+]
+
+[project.scripts]
+hdb-tt-venv = "hdb_tt_venv:main"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"

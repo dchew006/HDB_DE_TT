@@ -1,0 +1,47 @@
+graph LR
+    subgraph Internet ["INTERNET"]
+        API["data.gov.sg API"]
+    end
+
+
+    subgraph VPC ["INGESTION VPC"]
+        subgraph Public ["Public Subnet"]
+            NAT["NAT Gateway"]
+        end
+        subgraph Private ["Private Subnet"]
+            Fargate["ECS Fargate Downloader"]
+            VPCE["VPC Endpoint"]
+        end
+    end
+
+    subgraph DataLake ["DATA LAKE"]
+        S3Raw["S3: raw/"]
+        S3Curated["S3: curated/ (SSE-KMS)"]
+        S3quarantine["S3 Quarantined"]
+        GlueETL["Glue ETL Part 1 logic"]
+        GlueCat["Glue Catalog"]
+    end
+
+    stepfunc[Step Function]
+    sns[sns alert]
+
+    
+
+    %% Flows
+    Public -->|"HTTPS"| Internet
+    Fargate -->|"S3 gateway endpoint"| S3Raw
+
+    %% datalake
+    S3Raw -->GlueETL
+    GlueETL --> S3quarantine
+    GlueETL --> S3Curated
+    GlueETL --> GlueCat
+    
+    %% orchestration
+    EventBridge --> stepfunc --> |"success or failure"| sns
+    stepfunc --> GlueETL
+
+    stepfunc --> |"run task"| Fargate
+
+    Fargate --> NAT
+    
